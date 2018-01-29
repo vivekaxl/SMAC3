@@ -1,7 +1,7 @@
-smac\.utils\.util\_funcs module
+smac\.epm\.util\_funcs module
 ===============================
 
-.. automodule:: smac.utils.util_funcs
+.. automodule:: smac.epm.util_funcs
     :members:
     :undoc-members:
     :show-inheritance:

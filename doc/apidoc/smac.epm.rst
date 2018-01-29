@@ -16,4 +16,5 @@ smac\.epm package
    smac.epm.rf_with_instances
    smac.epm.rfr_imputator
    smac.epm.uncorrelated_mo_rf_with_instances
+   smac.epm.util_funcs
 
