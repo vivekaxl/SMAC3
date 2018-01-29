@@ -9,8 +9,9 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     OrdinalHyperparameter
 
 from smac.epm.rf_with_instances import RandomForestWithInstances
+from smac.epm.util_funcs import get_types
 import smac
-from smac.utils.util_funcs import get_types
+
 
 if sys.version_info[0] == 2:
     import mock

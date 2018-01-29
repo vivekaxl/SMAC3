@@ -10,6 +10,7 @@ from ConfigSpace import Configuration
 from smac.epm.rf_with_instances import RandomForestWithInstances
 from smac.epm.uncorrelated_mo_rf_with_instances import \
     UncorrelatedMultiObjectiveRandomForestWithInstances
+from smac.epm.util_funcs import get_types
 from smac.facade.smac_facade import SMAC
 from smac.initial_design.single_config_initial_design import SingleConfigInitialDesign
 from smac.optimizer.acquisition import EI, EIPS, LogEI
@@ -20,7 +21,6 @@ from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost, \
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import FirstRunCrashedException
 from smac.utils import test_helpers
-from smac.utils.util_funcs import get_types
 from smac.utils.io.traj_logging import TrajLogger
 from smac.utils.validate import Validator
 

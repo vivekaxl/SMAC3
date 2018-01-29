@@ -15,7 +15,7 @@ from smac.utils import test_helpers
 from smac.epm.rf_with_instances import RandomForestWithInstances
 from smac.epm.uncorrelated_mo_rf_with_instances import \
     UncorrelatedMultiObjectiveRandomForestWithInstances
-from smac.utils.util_funcs import get_types
+from smac.epm.util_funcs import get_types
 from smac.facade.epils_facade import EPILS
 from smac.initial_design.single_config_initial_design import SingleConfigInitialDesign
 
