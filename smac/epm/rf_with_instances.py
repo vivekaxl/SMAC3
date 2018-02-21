@@ -194,25 +194,32 @@ class RandomForestWithInstances(AbstractEPM):
             raise ValueError('Rows in X should have %d entries but have %d!' %
                              (self.types.shape[0], X.shape[1]))
 
-        means, vars_ = [], []
-        for row_X in X:
+        means = np.zeros(X.shape[0])
+        vars_ =  np.zeros(X.shape[0])
+        for i, row_X in enumerate(X):
             if self.unlog_y:
-                print(self.unlog_y)
                 preds_per_tree = self.rf.all_leaf_values(row_X)
-                means_per_tree = []
-                for preds in preds_per_tree:
-                    log_mean = np.mean(preds)
-                    log_var = np.var(preds)
+                
+                means_trees = np.zeros(len(preds_per_tree))
+                # we have to loop over them because 
+                # we can have different amounts of 
+                # predictions in each tree
+                for j, preds_tree in enumerate(preds_per_tree):
+                    # per tree
+                    log_mean = np.mean(preds_tree)
+                    log_var = np.var(preds_tree)
                     # mean of log-normal distribution:
-                    mean = 10**(log_mean + log_var/2)
-                    means_per_tree.append(mean)
-                mean = np.mean(means_per_tree) 
-                var = np.var(means_per_tree) # variance over trees as uncertainty estimate
+                    mean_tree = 10**(log_mean + log_var/2)
+                    means_trees[j] = mean_tree
+                
+                # across trees
+                mean = np.mean(means_trees) 
+                var = np.var(means_trees) # variance over trees as uncertainty estimate
             else:
+                #TODO: predict_mean_var() uses law of total variance, 
+                #but we only are interested in the variance across trees
                 mean, var = self.rf.predict_mean_var(row_X)
-            means.append(mean)
-            vars_.append(var)
-        means = np.array(means)
-        vars_ = np.array(vars_)
+            means[i] = mean
+            vars_[i] = var
 
         return means.reshape((-1, 1)), vars_.reshape((-1, 1))
