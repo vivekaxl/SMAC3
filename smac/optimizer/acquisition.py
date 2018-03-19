@@ -62,8 +62,7 @@ class AbstractAcquisitionFunction(object, metaclass=abc.ABCMeta):
         Parameters
         ----------
         configurations : list
-            The configurations where the acquisition function
-            should be evaluated. 
+            The configurations where the acquisition function should be evaluated. 
 
         Returns
         -------

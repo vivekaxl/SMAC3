@@ -41,9 +41,7 @@ class AcquisitionFunctionMaximizer(object, metaclass=abc.ABCMeta):
             config_space: ConfigurationSpace,
             rng: Union[bool, np.random.RandomState]=None
     ):
-        self.logger = logging.getLogger(
-            self.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__module__ + "." + self.__class__.__name__)
         self.acquisition_function = acquisition_function
         self.config_space = config_space
 
@@ -121,7 +119,8 @@ class AcquisitionFunctionMaximizer(object, metaclass=abc.ABCMeta):
         list: (acquisition value, Candidate solutions),
                 ordered by their acquisition function value
         """
-
+        import pdb
+        pdb.set_trace()
         acq_values = self.acquisition_function(configs)
 
         # From here
@@ -167,13 +166,7 @@ class LocalSearch(AcquisitionFunctionMaximizer):
         self.epsilon = epsilon
         self.max_iterations = max_iterations
 
-    def _maximize(
-            self,
-            runhistory: RunHistory,
-            stats: Stats,
-            num_points: int,
-            *args
-    ) -> List[Tuple[float, Configuration]]:
+    def _maximize(self, runhistory: RunHistory, stats: Stats, num_points: int, *args) -> List[Tuple[float, Configuration]]:
         """Starts a local search from the given startpoint and quits
         if either the max number of steps is reached or no neighbor
         with an higher improvement was found.
@@ -194,19 +187,15 @@ class LocalSearch(AcquisitionFunctionMaximizer):
             The acquisition value of the incumbent
 
         """
-
-        num_configurations_by_local_search = self._calculate_num_points(
-            num_points, stats, runhistory
-        )
-        init_points = self._get_initial_points(
-            num_configurations_by_local_search, runhistory)
+        # Vivek: Number of configurations sampled by local search is min(number of configurations sampled, 10)
+        num_configurations_by_local_search = self._calculate_num_points(num_points, stats, runhistory)
+        # Vivek: Initiate local search with best configurations from previous runs
+        init_points = self._get_initial_points(num_configurations_by_local_search, runhistory)
         configs_acq = []
 
         # Start N local search from different random start points
         for start_point in init_points:
-            acq_val, configuration = self._one_iter(
-                start_point)
-
+            acq_val, configuration = self._one_iter(start_point)
             configuration.origin = "Local Search"
             configs_acq.append((acq_val, configuration))
 
@@ -234,31 +223,18 @@ class LocalSearch(AcquisitionFunctionMaximizer):
         )
         return num_configurations_by_local_search
 
-    def _get_initial_points(self, num_configurations_by_local_search,
-                            runhistory):
+    def _get_initial_points(self, num_configurations_by_local_search, runhistory):
         if runhistory.empty():
-            init_points = self.config_space.sample_configuration(
-                size=num_configurations_by_local_search)
+            init_points = self.config_space.sample_configuration(size=num_configurations_by_local_search)
         else:
             # initiate local search with best configurations from previous runs
             configs_previous_runs = runhistory.get_all_configs()
-            configs_previous_runs_sorted = self._sort_configs_by_acq_value(
-                configs_previous_runs)
-            num_configs_local_search = int(min(
-                len(configs_previous_runs_sorted),
-                num_configurations_by_local_search)
-            )
-            init_points = list(
-                map(lambda x: x[1],
-                    configs_previous_runs_sorted[:num_configs_local_search])
-            )
+            configs_previous_runs_sorted = self._sort_configs_by_acq_value(configs_previous_runs)
+            num_configs_local_search = int(min(len(configs_previous_runs_sorted),num_configurations_by_local_search))
+            init_points = list(map(lambda x: x[1], configs_previous_runs_sorted[:num_configs_local_search]))
         return init_points
 
-    def _one_iter(
-            self,
-            start_point: Configuration,
-            *args
-    ) -> Tuple[float, Configuration]:
+    def _one_iter(self, start_point: Configuration, *args) -> Tuple[float, Configuration]:
 
         incumbent = start_point
         # Compute the acquisition value of the incumbent
@@ -268,7 +244,6 @@ class LocalSearch(AcquisitionFunctionMaximizer):
         neighbors_looked_at = 0
         time_n = []
         while True:
-
             local_search_steps += 1
             if local_search_steps % 1000 == 0:
                 self.logger.warning(
@@ -282,8 +257,7 @@ class LocalSearch(AcquisitionFunctionMaximizer):
 
             # Get one exchange neighborhood returns an iterator (in contrast of
             # the previously returned list).
-            all_neighbors = get_one_exchange_neighbourhood(
-                incumbent, seed=self.rng.randint(MAXINT))
+            all_neighbors = get_one_exchange_neighbourhood(incumbent, seed=self.rng.randint(MAXINT))
 
             for neighbor in all_neighbors:
                 s_time = time.time()
@@ -298,9 +272,7 @@ class LocalSearch(AcquisitionFunctionMaximizer):
                     changed_inc = True
                     break
 
-            if (not changed_inc) or \
-                    (self.max_iterations is not None and
-                     local_search_steps == self.max_iterations):
+            if (not changed_inc) or (self.max_iterations is not None and local_search_steps == self.max_iterations):
                 self.logger.debug("Local search took %d steps and looked at %d "
                                   "configurations. Computing the acquisition "
                                   "value for one configuration took %f seconds"
@@ -371,31 +343,14 @@ class InterleavedLocalAndRandomSearch(AcquisitionFunctionMaximizer):
             rng: Union[bool, np.random.RandomState] = None,
     ):
         super().__init__(acquisition_function, config_space, rng)
-        self.random_search = RandomSearch(
-            acquisition_function, config_space, rng
-        )
-        self.local_search = LocalSearch(
-            acquisition_function, config_space, rng
-        )
+        self.random_search = RandomSearch(acquisition_function, config_space, rng)
+        self.local_search = LocalSearch(acquisition_function, config_space, rng)
 
-    def maximize(
-            self,
-            runhistory: RunHistory,
-            stats: Stats,
-            num_points: int,
-            *args
-    ) -> Iterable[Configuration]:
-        next_configs_by_local_search = self.local_search._maximize(
-            runhistory, stats, 10,
-        )
+    def maximize(self, runhistory: RunHistory, stats: Stats, num_points: int, *args) -> Iterable[Configuration]:
+        next_configs_by_local_search = self.local_search._maximize(runhistory, stats, 10,)
 
         # Get configurations sorted by EI
-        next_configs_by_random_search_sorted = self.random_search._maximize(
-            runhistory,
-            stats,
-            num_points - len(next_configs_by_local_search),
-            _sorted=True,
-        )
+        next_configs_by_random_search_sorted = self.random_search._maximize(runhistory, stats, num_points - len(next_configs_by_local_search), _sorted=True,)
 
         # Having the configurations from random search, sorted by their
         # acquisition function value is important for the first few iterations
@@ -403,10 +358,7 @@ class InterleavedLocalAndRandomSearch(AcquisitionFunctionMaximizer):
         # want to use only random configurations. Having them at the begging of
         # the list ensures this (even after adding the configurations by local
         # search, and then sorting them)
-        next_configs_by_acq_value = (
-            next_configs_by_random_search_sorted
-            + next_configs_by_local_search
-        )
+        next_configs_by_acq_value = (next_configs_by_random_search_sorted + next_configs_by_local_search)
         next_configs_by_acq_value.sort(reverse=True, key=lambda x: x[0])
         self.logger.debug(
             "First 10 acq func (origin) values of selected configurations: %s",

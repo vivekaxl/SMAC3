@@ -162,6 +162,7 @@ class SMAC(object):
                                               pca_components=scenario.PCA_DIM)
         # initial acquisition function
         if acquisition_function is None:
+            # Vivek: It has been shown that runtime can be efficiently modelled by log transformation
             if scenario.run_obj == "runtime":
                 acquisition_function = LogEI(model=model)
             else:
@@ -172,13 +173,8 @@ class SMAC(object):
 
         # initialize optimizer on acquisition function
         if acquisition_function_optimizer is None:
-            acquisition_function_optimizer = InterleavedLocalAndRandomSearch(
-                acquisition_function, scenario.cs, np.random.RandomState(seed=rng.randint(MAXINT))
-            )
-        elif not isinstance(
-                acquisition_function_optimizer,
-                AcquisitionFunctionMaximizer,
-            ):
+            acquisition_function_optimizer = InterleavedLocalAndRandomSearch(acquisition_function, scenario.cs, np.random.RandomState(seed=rng.randint(MAXINT)))
+        elif not isinstance(acquisition_function_optimizer, AcquisitionFunctionMaximizer,):
             raise ValueError(
                 "Argument 'acquisition_function_optimizer' must be of type"
                 "'AcquisitionFunctionMaximizer', but is '%s'" %
@@ -221,14 +217,11 @@ class SMAC(object):
                              "'%s'" % (tae_runner.run_obj, scenario.run_obj))
 
         # inject stats if necessary
-        if tae_runner.stats is None:
-            tae_runner.stats = self.stats
+        if tae_runner.stats is None: tae_runner.stats = self.stats
         # inject runhistory if necessary
-        if tae_runner.runhistory is None:
-            tae_runner.runhistory = runhistory
+        if tae_runner.runhistory is None: tae_runner.runhistory = runhistory
         # inject cost_for_crash
-        if tae_runner.crash_cost != scenario.cost_for_crash:
-            tae_runner.crash_cost = scenario.cost_for_crash
+        if tae_runner.crash_cost != scenario.cost_for_crash: tae_runner.crash_cost = scenario.cost_for_crash
 
         # initialize intensification
         if intensifier is None:
@@ -351,6 +344,7 @@ class SMAC(object):
             'rng': rng,
             'restore_incumbent': restore_incumbent
         }
+
         if smbo_class is None:
             self.solver = SMBO(**smbo_args)
         else:

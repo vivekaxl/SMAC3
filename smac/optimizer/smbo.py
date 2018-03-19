@@ -174,7 +174,6 @@ class SMBO(object):
 
             start_time = time.time()
             X, Y = self.rh2EPM.transform(self.runhistory)
-
             self.logger.debug("Search for next configuration")
             # get all found configurations sorted according to acq
             challengers = self.choose_next(X, Y)
@@ -207,8 +206,7 @@ class SMBO(object):
 
         return self.incumbent
 
-    def choose_next(self, X: np.ndarray, Y: np.ndarray,
-                    incumbent_value: float=None):
+    def choose_next(self, X: np.ndarray, Y: np.ndarray, incumbent_value: float=None):
         """Choose next candidate solution with Bayesian optimization. The 
         suggested configurations depend on the argument ``acq_optimizer`` to
         the ``SMBO`` class.
@@ -231,26 +229,23 @@ class SMBO(object):
         -------
         Iterable
         """
+        import pdb
+        pdb.set_trace()
         if X.shape[0] == 0:
             # Only return a single point to avoid an overly high number of
             # random search iterations
-            return self._random_search.maximize(
-                runhistory=self.runhistory, stats=self.stats, num_points=1
-            )
+            return self._random_search.maximize(runhistory=self.runhistory, stats=self.stats, num_points=1)
 
         self.model.train(X, Y)
 
         if incumbent_value is None:
             if self.runhistory.empty():
-                raise ValueError("Runhistory is empty and the cost value of "
-                                 "the incumbent is unknown.")
+                raise ValueError("Runhistory is empty and the cost value of the incumbent is unknown.")
             incumbent_value = self.runhistory.get_cost(self.incumbent)
 
         self.acquisition_func.update(model=self.model, eta=incumbent_value)
 
-        challengers = self.acq_optimizer.maximize(
-            self.runhistory, self.stats, 5000
-        )
+        challengers = self.acq_optimizer.maximize(self.runhistory, self.stats, 5000)
         return challengers
 
     def validate(self, config_mode='inc', instance_mode='train+test',
@@ -296,7 +291,7 @@ class SMBO(object):
             new_rh = validator.validate(config_mode, instance_mode, repetitions,
                                         n_jobs, backend, self.runhistory,
                                         self.intensifier.tae_runner,
-                                        output=new_rh_path)
+                                        new_rh_path)
         return new_rh
 
     def _get_timebound_for_intensification(self, time_spent):

@@ -148,14 +148,11 @@ class Intensifier(object):
         # Line 1 + 2
         for challenger in challengers:
             if challenger == incumbent:
-                self.logger.warning(
-                    "Challenger was the same as the current incumbent; Skipping challenger")
+                self.logger.warning("Challenger was the same as the current incumbent; Skipping challenger")
                 continue
 
             self.logger.debug("Intensify on %s", challenger)
-            if hasattr(challenger, 'origin'):
-                self.logger.debug(
-                    "Configuration origin: %s", challenger.origin)
+            if hasattr(challenger, 'origin'):self.logger.debug("Configuration origin: %s", challenger.origin)
 
             try:
                 # Lines 3-7
@@ -167,9 +164,7 @@ class Intensifier(object):
                                                   run_history=run_history,
                                                   aggregate_func=aggregate_func,
                                                   log_traj=log_traj)
-                if self.always_race_against and \
-                        challenger == incumbent and \
-                        self.always_race_against != challenger:
+                if self.always_race_against and challenger == incumbent and self.always_race_against != challenger:
                     self.logger.debug("Race against constant configuration after incumbent change.")
                     incumbent = self._race_challenger(challenger=self.always_race_against,
                                                       incumbent=incumbent,
@@ -189,19 +184,16 @@ class Intensifier(object):
                     "Maximum #runs for intensification reached")
                 break
             elif self._chall_indx > 1 and tm - self.start_time - time_bound >= 0:
-                self.logger.debug("Timelimit for intensification reached ("
-                                  "used: %f sec, available: %f sec)" %
+                self.logger.debug("Timelimit for intensification reached (used: %f sec, available: %f sec)" %
                                   (tm - self.start_time, time_bound))
                 break
 
         # output estimated performance of incumbent
         inc_runs = run_history.get_runs_for_config(incumbent)
         inc_perf = aggregate_func(incumbent, run_history, inc_runs)
-        self.logger.info("Updated estimated cost of incumbent on %d runs: %.4f"
-                         % (len(inc_runs), inc_perf))
+        self.logger.info("Updated estimated cost of incumbent on %d runs: %.4f"% (len(inc_runs), inc_perf))
 
-        self.stats.update_average_configs_per_intensify(
-            n_configs=self._chall_indx)
+        self.stats.update_average_configs_per_intensify(n_configs=self._chall_indx)
 
         return incumbent, inc_perf
 

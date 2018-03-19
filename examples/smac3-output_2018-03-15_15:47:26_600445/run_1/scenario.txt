@@ -1,0 +1,17 @@
+paramfile = smac3-output_2018-03-15_15:47:26_600445/run_1/configspace.pcs
+cost_for_crash = 2147483647.0
+wallclock_limit = inf
+intensification_percentage = 0.5
+always_race_default = False
+deterministic = True
+overall_obj = par10
+runcount_limit = 200.0
+execdir = .
+maxR = 2000
+initial_incumbent = DEFAULT
+tuner-timeout = inf
+output_dir = smac3-output_2018-03-15_15:47:26_600445
+run_obj = quality
+abort_on_first_run_crash = True
+shared_model = False
+minR = 1
